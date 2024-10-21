@@ -5,16 +5,17 @@ pipeline {
         FILE_NAME = "grandle.zip"
         DIR_UNZIP = "grandle17"
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
-        DOCKER_CONTAINER = "springbootG_jenkins"
         DOCKER_CREDENTIALS_ID = "dockertoken"
-        GIT_BRANCH = "master"
-        GIT_MANIFEST_REPO = "https://github.com/WexleyTan/unzip_gradle_manifest.git"
-        MANIFEST_REPO = "unzip_gradle_manifest"
-        MANIFEST_FILE_PATH = "deployment.yaml"
-        GIT_CREDENTIALS_ID = 'git_pass'
+        GIT_REPO = "https://github.com/WexleyTan/gradle17_store.git"  
+        GIT_BRANCH = "master"  
+        GIT_MANIFEST_REPO = "https://github.com/WexleyTan/gradle17_manifest.git"  
+        MANIFEST_REPO = "gradle17_manifest"  
+        MANIFEST_FILE_PATH = "deployment.yaml" 
+        GIT_CREDENTIALS_ID = 'git_pass' 
     }
 
     stages {
+
         stage('Unzip File') {
             steps {
                 script {
@@ -24,9 +25,7 @@ pipeline {
                             echo "Removing existing directory ${DIR_UNZIP}..."
                             rm -rf ${DIR_UNZIP}
                             echo "Unzipping the file..."
-                            unzip -o '${FILE_NAME}' || { echo 'Unzip failed'; exit 1; }
-                            echo "Contents of ${DIR_UNZIP}:"
-                            ls -l ${DIR_UNZIP}  # List the contents after unzipping
+                            unzip -o '${FILE_NAME}'
                         else
                             echo "'${FILE_NAME}' does not exist."
                             exit 1
@@ -40,27 +39,28 @@ pipeline {
             steps {
                 script {
                     echo "Creating Dockerfile..."
-                    dir ("${DIR_UNZIP}") {
-                        writeFile file: 'Dockerfile', text: '''
-                        FROM eclipse-temurin:17-jdk AS build
-                        WORKDIR /usr/app/
-                        COPY . .
-                        RUN chmod +x gradlew
-                        RUN ./gradlew bootJar
+                    writeFile file: 'Dockerfile', text: '''
+                    FROM eclipse-temurin:17-jdk AS build
+                    WORKDIR /usr/app/
+                    COPY . .
+                    RUN chmod +x gradlew
+                    RUN ./gradlew bootJar
 
-                        FROM eclipse-temurin:17-jdk
-                        ENV JAR_NAME=app.jar
-                        ENV APP_HOME=/usr/app/
-                        WORKDIR $APP_HOME
-                        COPY --from=build $APP_HOME/build/libs/*.jar app.jar
-                        EXPOSE 8080
-                        ENTRYPOINT ["java", "-jar", "/usr/app/app.jar"]
-                        '''
-                    }
+                    FROM eclipse-temurin:17-jdk
+                    ENV JAR_NAME=app.jar
+                    ENV APP_HOME=/usr/app/
+                    WORKDIR $APP_HOME
+                    COPY --from=build $APP_HOME/build/libs/*.jar app.jar
+                    EXPOSE 8080
+                    ENTRYPOINT ["java", "-jar", "/usr/app/app.jar"]
+                    '''
                 }
             }
         }
+
+
         
+
         stage('Build and Push Docker Image') {
             steps {
                 script {
@@ -68,21 +68,9 @@ pipeline {
                     
                     dir("${DIR_UNZIP}") {
                         sh "cp ../Dockerfile ."
-                        
-                        // Check if build.gradle exists
-                        sh """
-                            echo "Checking for build.gradle..."
-                            if [ ! -f 'build.gradle' ]; then
-                                echo "'build.gradle' does not exist in the current directory."
-                                exit 1
-                            fi
-                        """
-                        
-                        // Adjust path here if necessary
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
-                        sh "docker build -t ${DOCKER_IMAGE} . "  
+                        sh "docker build -t ${DOCKER_IMAGE} ."  
                     }
-                    
                     sh "docker images | grep -i ${IMAGE}"
 
                     echo "Logging in to Docker Hub using Jenkins credentials..."
@@ -95,7 +83,6 @@ pipeline {
                 }
             }
         }
-        
         stage("Cloning the Manifest File") {
             steps {
                 script {
@@ -108,7 +95,7 @@ pipeline {
                     """
                     
                     echo "Cloning the manifest repository..."
-                    sh "git clone -b ${GIT_BRANCH} ${GIT_MANIFEST_REPO} ${MANIFEST_REPO}"  
+                    sh "git clone -b ${GIT_BRANCH} ${GIT_MANIFEST_REPO} ${MANIFEST_REPO}"  // Clone the manifest repository
                 }
             }
         }
@@ -126,11 +113,11 @@ pipeline {
                         echo "Committing and pushing changes to the manifest repository..."
                         withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
                             sh """
-                                git config --global user.name "${GIT_USER_NAME}"
-                                git config --global user.email "${GIT_USER_EMAIL}"
+                                git config --global user.name "WexleyTan"
+                                git config --global user.email "neathtan1402@gmail.com"
                                 git add ${MANIFEST_FILE_PATH}
                                 git commit -m "Update image to ${DOCKER_IMAGE}"
-                                git push https://${GIT_USER}:${GIT_PASS}@github.com/WexleyTan/gradle17_manifest ${GIT_BRANCH}
+                                git push https://${GIT_USER}:${GIT_PASS}@github.com/WexleyTan/unzip_gradle_manifest ${GIT_BRANCH}
                             """
                         }
                     }
