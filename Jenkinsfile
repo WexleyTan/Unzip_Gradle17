@@ -34,7 +34,6 @@ pipeline {
                 }
             }
         }
-
         stage('Create Dockerfile') {
             steps {
                 script {
@@ -57,17 +56,17 @@ pipeline {
                 }
             }
         }
-
-
+        
         stage('Build and Push Docker Image') {
             steps {
                 script {
                     echo "Building Docker image..."
                     
-                    dir("${DIR_UNZIP}") {
+                    dir("${DIR_FILE}") {
+                        
                         sh "cp ../Dockerfile ."
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
-                        sh "docker build -t ${DOCKER_IMAGE} ."  
+                        sh "docker build -t ${DOCKER_IMAGE} . "  
                     }
                     sh "docker images | grep -i ${IMAGE}"
 
@@ -81,6 +80,7 @@ pipeline {
                 }
             }
         }
+        
         stage("Cloning the Manifest File") {
             steps {
                 script {
@@ -115,12 +115,14 @@ pipeline {
                                 git config --global user.email "neathtan1402@gmail.com"
                                 git add ${MANIFEST_FILE_PATH}
                                 git commit -m "Update image to ${DOCKER_IMAGE}"
-                                git push https://${GIT_USER}:${GIT_PASS}@github.com/WexleyTan/unzip_gradle_manifest ${GIT_BRANCH}
+                                git push https://${GIT_USER}:${GIT_PASS}@github.com/WexleyTan/gradle17_manifest ${GIT_BRANCH}
                             """
                         }
                     }
                 }
             }
         }
+
+        
     }
 }
