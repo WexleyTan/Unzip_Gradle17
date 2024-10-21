@@ -6,7 +6,6 @@ pipeline {
         DIR_UNZIP = "grandle17"
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = "dockertoken"
-        GIT_REPO = "https://github.com/WexleyTan/gradle17_store.git"  
         GIT_BRANCH = "master"  
         GIT_MANIFEST_REPO = "https://github.com/WexleyTan/gradle17_manifest.git"  
         MANIFEST_REPO = "gradle17_manifest"  
