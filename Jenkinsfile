@@ -4,7 +4,7 @@ pipeline {
         IMAGE = "neathtan/clone_gradle"
         FILE_NAME = "grandle.zip"
         DIR_UNZIP = "grandle17"
-        DIR_FILE = "${DIR_UNZIP}"  // Ensure this variable is defined
+        DIR_FILE = "${DIR_UNZIP}"  
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
         DOCKER_CONTAINER = "springbootG_jenkins"
         DOCKER_CREDENTIALS_ID = "dockertoken"
@@ -65,7 +65,7 @@ pipeline {
                 script {
                     echo "Building Docker image..."
                     
-                    dir("${DIR_FILE}") {
+                    dir("${DIR_UNZIP}") {
                         sh "cp ../Dockerfile ."
                         sh """
                             echo "Checking for build.gradle..."
@@ -75,7 +75,6 @@ pipeline {
                             fi
                         """
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
-                        
                         sh "docker build -t ${DOCKER_IMAGE} . "  
                     }
                     
