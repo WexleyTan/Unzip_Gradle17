@@ -67,6 +67,13 @@ pipeline {
                     
                     dir("${DIR_FILE}") {
                         sh "cp ../Dockerfile ."
+                        sh """
+                            echo "Checking for build.gradle..."
+                            if [ ! -f 'build.gradle' ]; then
+                                echo "'build.gradle' does not exist in the current directory."
+                                exit 1
+                            fi
+                        """
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
                         
                         sh "docker build -t ${DOCKER_IMAGE} . "  
