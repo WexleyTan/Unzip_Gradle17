@@ -25,6 +25,8 @@ pipeline {
                             rm -rf ${DIR_UNZIP}
                             echo "Unzipping the file..."
                             unzip -o '${FILE_NAME}' || { echo 'Unzip failed'; exit 1; }
+                            echo "Contents of ${DIR_UNZIP}:"
+                            ls -l ${DIR_UNZIP}  # List the contents after unzipping
                         else
                             echo "'${FILE_NAME}' does not exist."
                             exit 1
@@ -39,21 +41,21 @@ pipeline {
                 script {
                     echo "Creating Dockerfile..."
                     dir ("${DIR_UNZIP}") {
-                    writeFile file: 'Dockerfile', text: '''
-                    FROM eclipse-temurin:17-jdk AS build
-                    WORKDIR /usr/app/
-                    COPY . .
-                    RUN chmod +x gradlew
-                    RUN ./gradlew bootJar
+                        writeFile file: 'Dockerfile', text: '''
+                        FROM eclipse-temurin:17-jdk AS build
+                        WORKDIR /usr/app/
+                        COPY . .
+                        RUN chmod +x gradlew
+                        RUN ./gradlew bootJar
 
-                    FROM eclipse-temurin:17-jdk
-                    ENV JAR_NAME=app.jar
-                    ENV APP_HOME=/usr/app/
-                    WORKDIR $APP_HOME
-                    COPY --from=build $APP_HOME/build/libs/*.jar app.jar
-                    EXPOSE 8080
-                    ENTRYPOINT ["java", "-jar", "/usr/app/app.jar"]
-                    '''
+                        FROM eclipse-temurin:17-jdk
+                        ENV JAR_NAME=app.jar
+                        ENV APP_HOME=/usr/app/
+                        WORKDIR $APP_HOME
+                        COPY --from=build $APP_HOME/build/libs/*.jar app.jar
+                        EXPOSE 8080
+                        ENTRYPOINT ["java", "-jar", "/usr/app/app.jar"]
+                        '''
                     }
                 }
             }
@@ -66,6 +68,17 @@ pipeline {
                     
                     dir("${DIR_UNZIP}") {
                         sh "cp ../Dockerfile ."
+                        
+                        // Check if build.gradle exists
+                        sh """
+                            echo "Checking for build.gradle..."
+                            if [ ! -f 'build.gradle' ]; then
+                                echo "'build.gradle' does not exist in the current directory."
+                                exit 1
+                            fi
+                        """
+                        
+                        // Adjust path here if necessary
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
                         sh "docker build -t ${DOCKER_IMAGE} . "  
                     }
