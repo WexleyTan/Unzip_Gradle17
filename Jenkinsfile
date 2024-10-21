@@ -12,8 +12,6 @@ pipeline {
         MANIFEST_REPO = "unzip_gradle_manifest"
         MANIFEST_FILE_PATH = "deployment.yaml"
         GIT_CREDENTIALS_ID = 'git_pass'
-        GIT_USER_NAME = "WexleyTan"  // Use an environment variable for user name
-        GIT_USER_EMAIL = "neathtan1402@gmail.com"  // Use an environment variable for user email
     }
 
     stages {
@@ -40,6 +38,7 @@ pipeline {
             steps {
                 script {
                     echo "Creating Dockerfile..."
+                    dir ("${DIR_UNZIP}") {
                     writeFile file: 'Dockerfile', text: '''
                     FROM eclipse-temurin:17-jdk AS build
                     WORKDIR /usr/app/
@@ -55,6 +54,7 @@ pipeline {
                     EXPOSE 8080
                     ENTRYPOINT ["java", "-jar", "/usr/app/app.jar"]
                     '''
+                    }
                 }
             }
         }
