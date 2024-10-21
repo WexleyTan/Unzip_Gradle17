@@ -4,6 +4,7 @@ pipeline {
         IMAGE = "neathtan/clone_gradle"
         FILE_NAME = "grandle.zip"
         DIR_UNZIP = "grandle17"
+        DIR_FILE = "${DIR_UNZIP}"  // Ensure this variable is defined
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
         DOCKER_CONTAINER = "springbootG_jenkins"
         DOCKER_CREDENTIALS_ID = "dockertoken"
@@ -12,10 +13,11 @@ pipeline {
         MANIFEST_REPO = "unzip_gradle_manifest"
         MANIFEST_FILE_PATH = "deployment.yaml"
         GIT_CREDENTIALS_ID = 'git_pass'
+        GIT_USER_NAME = "WexleyTan"  // Use an environment variable for user name
+        GIT_USER_EMAIL = "neathtan1402@gmail.com"  // Use an environment variable for user email
     }
 
     stages {
-
         stage('Unzip File') {
             steps {
                 script {
@@ -25,7 +27,7 @@ pipeline {
                             echo "Removing existing directory ${DIR_UNZIP}..."
                             rm -rf ${DIR_UNZIP}
                             echo "Unzipping the file..."
-                            unzip -o '${FILE_NAME}'
+                            unzip -o '${FILE_NAME}' || { echo 'Unzip failed'; exit 1; }
                         else
                             echo "'${FILE_NAME}' does not exist."
                             exit 1
@@ -34,6 +36,7 @@ pipeline {
                 }
             }
         }
+
         stage('Create Dockerfile') {
             steps {
                 script {
@@ -63,11 +66,11 @@ pipeline {
                     echo "Building Docker image..."
                     
                     dir("${DIR_FILE}") {
-                        
                         sh "cp ../Dockerfile ."
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
                         sh "docker build -t ${DOCKER_IMAGE} . "  
                     }
+                    
                     sh "docker images | grep -i ${IMAGE}"
 
                     echo "Logging in to Docker Hub using Jenkins credentials..."
@@ -111,8 +114,8 @@ pipeline {
                         echo "Committing and pushing changes to the manifest repository..."
                         withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
                             sh """
-                                git config --global user.name "WexleyTan"
-                                git config --global user.email "neathtan1402@gmail.com"
+                                git config --global user.name "${GIT_USER_NAME}"
+                                git config --global user.email "${GIT_USER_EMAIL}"
                                 git add ${MANIFEST_FILE_PATH}
                                 git commit -m "Update image to ${DOCKER_IMAGE}"
                                 git push https://${GIT_USER}:${GIT_PASS}@github.com/WexleyTan/gradle17_manifest ${GIT_BRANCH}
@@ -122,7 +125,5 @@ pipeline {
                 }
             }
         }
-
-        
     }
 }
