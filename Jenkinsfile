@@ -67,7 +67,7 @@ pipeline {
                     
                     dir("${DIR_FILE}") {
                         sh "cp ../Dockerfile ."
-                        sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
+                        sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(21)/' build.gradle"
                         
                         sh "docker build -t ${DOCKER_IMAGE} . "  
                     }
