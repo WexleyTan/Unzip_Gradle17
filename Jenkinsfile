@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE = "neathtan/gradle17_clone"
         FILE_NAME = "gradle14_new.zip"
-        DIR_UNZIP = "gradle17"  // Corrected the directory name from 'grandle17' to 'gradle17'
+        DIR_UNZIP = "gradle14_new"  // Corrected the directory name from 'grandle17' to 'gradle17'
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = "dockertoken"
         GIT_BRANCH = "master"
