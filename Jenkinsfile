@@ -39,13 +39,13 @@ pipeline {
                 script {
                     echo "Creating Dockerfile..."
                     writeFile file: 'Dockerfile', text: '''
-                    FROM eclipse-temurin:21-jdk AS build
+                    FROM eclipse-temurin:17-jdk AS build
                     WORKDIR /usr/app/
                     COPY . .
                     RUN chmod +x gradlew
                     RUN ./gradlew bootJar
 
-                    FROM eclipse-temurin:21-jdk
+                    FROM eclipse-temurin:17-jdk
                     ENV JAR_NAME=app.jar
                     ENV APP_HOME=/usr/app/
                     WORKDIR $APP_HOME
@@ -57,6 +57,7 @@ pipeline {
             }
         }
 
+
         stage('Build and Push Docker Image') {
             steps {
                 script {
@@ -64,7 +65,7 @@ pipeline {
                     
                     dir("${DIR_UNZIP}") {
                         sh "cp ../Dockerfile ."
-                        sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(21)/' build.gradle"
+                        sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
                         sh "docker build -t ${DOCKER_IMAGE} ."  
                     }
                     sh "docker images | grep -i ${IMAGE}"
@@ -91,7 +92,7 @@ pipeline {
                     """
                     
                     echo "Cloning the manifest repository..."
-                    sh "git clone -b ${GIT_BRANCH} ${GIT_MANIFEST_REPO} ${MANIFEST_REPO}"  // Clone the manifest repository
+                    sh "git clone -b ${GIT_BRANCH} ${GIT_MANIFEST_REPO} ${MANIFEST_REPO}"  
                 }
             }
         }
