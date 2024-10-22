@@ -3,14 +3,14 @@ pipeline {
     environment {
         IMAGE = "neathtan/gradle17_clone"
         FILE_NAME = "gradle14_new.zip"
-        DIR_UNZIP = "grandle17"
+        DIR_UNZIP = "gradle17"  // Corrected the directory name from 'grandle17' to 'gradle17'
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = "dockertoken"
-        GIT_BRANCH = "master"  
-        GIT_MANIFEST_REPO = "https://github.com/WexleyTan/gradle17_manifest.git"  
-        MANIFEST_REPO = "gradle17_manifest"  
-        MANIFEST_FILE_PATH = "deployment.yaml" 
-        GIT_CREDENTIALS_ID = 'git_pass' 
+        GIT_BRANCH = "master"
+        GIT_MANIFEST_REPO = "https://github.com/WexleyTan/gradle17_manifest.git"
+        MANIFEST_REPO = "gradle17_manifest"
+        MANIFEST_FILE_PATH = "deployment.yaml"
+        GIT_CREDENTIALS_ID = 'git_pass'
     }
 
     stages {
@@ -58,7 +58,6 @@ pipeline {
             }
         }
 
-
         stage('Build and Push Docker Image') {
             steps {
                 script {
@@ -67,15 +66,17 @@ pipeline {
                     dir("${DIR_UNZIP}") {
                         sh "ls -al"
                         sh "cp ../Dockerfile ."
+                        
+                        // Corrected the sed command
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
-"
-                        sh "docker build -t ${DOCKER_IMAGE} ."  
+                        
+                        sh "docker build -t ${DOCKER_IMAGE} ."
                     }
                     sh "docker images | grep -i ${IMAGE}"
 
                     echo "Logging in to Docker Hub using Jenkins credentials..."
                     withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
-                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                        sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
                     }
 
                     echo "Pushing the image to Docker Hub..."
@@ -83,6 +84,7 @@ pipeline {
                 }
             }
         }
+
         stage("Cloning the Manifest File") {
             steps {
                 script {
@@ -95,7 +97,7 @@ pipeline {
                     """
                     
                     echo "Cloning the manifest repository..."
-                    sh "git clone -b ${GIT_BRANCH} ${GIT_MANIFEST_REPO} ${MANIFEST_REPO}"  
+                    sh "git clone -b ${GIT_BRANCH} ${GIT_MANIFEST_REPO} ${MANIFEST_REPO}"
                 }
             }
         }
