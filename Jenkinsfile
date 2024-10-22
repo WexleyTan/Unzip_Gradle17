@@ -64,7 +64,7 @@ pipeline {
                 script {
                     echo "Building Docker image..."
                     
-                    dir("${DIR_UNZIP}") {
+                    dir("${DIR_UNZIP}/project") {
                         sh "ls -al"
                         sh "cp ../Dockerfile ."
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
