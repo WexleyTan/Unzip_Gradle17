@@ -64,7 +64,8 @@ pipeline {
                     echo "Building Docker image..."
                     
                     dir("${DIR_UNZIP}") {
-                        sh "ls "
+                        sh "ls"
+                        sh "pwd"
                         sh "cp ../Dockerfile ."
                         
                         // Corrected the sed command
