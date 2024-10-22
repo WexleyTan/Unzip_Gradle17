@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         IMAGE = "neathtan/gradle17_clone"
-        FILE_NAME = "grandle.zip"
+        FILE_NAME = "gradle14_new.zip"
         DIR_UNZIP = "grandle17"
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = "dockertoken"
