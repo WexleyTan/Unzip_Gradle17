@@ -30,6 +30,7 @@ pipeline {
                             exit 1
                         fi
                     """
+                    sh "ls -al"
                 }
             }
         }
