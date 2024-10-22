@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE = "neathtan/gradle17_clone"
         FILE_NAME = "gradle14_new.zip"
-        DIR_UNZIP = "gradle14_new"  // Corrected the directory name from 'grandle17' to 'gradle17'
+        DIR_UNZIP = "gradle14_new"  
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = "dockertoken"
         GIT_BRANCH = "master"
@@ -120,7 +120,7 @@ pipeline {
                                 git config --global user.email "neathtan1402@gmail.com"
                                 git add ${MANIFEST_FILE_PATH}
                                 git commit -m "Update image to ${DOCKER_IMAGE}"
-                                git push https://${GIT_USER}:${GIT_PASS}@github.com/WexleyTan/unzip_gradle_manifest.git ${GIT_BRANCH}
+                                git push https://${GIT_USER}:${GIT_PASS}@github.com/WexleyTan/gradle17_manifest.git ${GIT_BRANCH}
                             """
                         }
                     }
