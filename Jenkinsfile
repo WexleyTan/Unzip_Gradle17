@@ -5,6 +5,7 @@ pipeline {
         FILE_NAME = "gradle14_new.zip"
         DIR_UNZIP = "gradle14_new"  
         DOCKER_IMAGE = "${IMAGE}:${BUILD_NUMBER}"
+        DOCKER_CONTAINER = "springboot17_jenkins"
         DOCKER_CREDENTIALS_ID = "dockertoken"
         GIT_BRANCH = "master"
         GIT_MANIFEST_REPO = "https://github.com/WexleyTan/gradle17_manifest.git"
@@ -68,7 +69,6 @@ pipeline {
                         sh "pwd"
                         sh "cp ../Dockerfile ."
                         
-                        // Corrected the sed command
                         sh "sed -i 's/languageVersion = JavaLanguageVersion.of([0-9]*)/languageVersion = JavaLanguageVersion.of(17)/' build.gradle"
                         
                         sh "docker build -t ${DOCKER_IMAGE} ."
